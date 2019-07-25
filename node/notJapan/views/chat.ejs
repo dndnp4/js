@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <%- include mod/head.ejs %>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+  <div class="wrapper">
+    <%- include mod/main_header.ejs %>
+    <%- include mod/main_sidebar.ejs %>
+    <%- include pages/chat_sub.ejs %>
+    <%- include mod/copyright.ejs %>
+    <!-- 우측사이드바-->
+    <%- include mod/config.ejs %>
+    <div class="control-sidebar-bg"></div>
+  </div>
+  <!-- ./wrapper -->
+  <%- include mod/foot.ejs %>
+  <script src='/socket.io/socket.io.js'></script>
+  <script>
+    const socket = io.connect('http://localhost:3000')
+    let user_name //채팅방 닉네임
+    socket.on('connect', () => {
+      user_name = prompt('익명 닉네임 입력')
+      socket.emit('s_send_userName', user_name, new Date())
+    })
+    //채팅 클라이언트 코드
+    socket.on('c_send_msg', (sender, msg, time) => {
+      addMsg(sender, msg, time)
+
+    })
+    $('input[name=message]').on('keypress', (evt) => {
+      if (evt.keyCode == 13) {
+        sendMsg()
+      }
+    })
+    $('#sendBtn').on('click', (evt) => {
+      sendMsg()
+    })
+    function sendMsg() {
+      socket.emit('s_send_msg', $('input[name=message]').val(), new Date())
+      $('input[name=message]').val('')
+    }
+
+    function addMsg(sender, msg, time) {
+      let flag = sender === user_name ? 'right' : 'left'
+      let profile = sender === user_name ? 'KakaoTalk_20190724_152657831.jpg' : 'avatar.png'
+      let html = `<div class="direct-chat-msg ${flag}">
+                    <div class="direct-chat-info clearfix">
+                      <span class="direct-chat-name pull-${flag}">${sender}</span>
+                      <span class="direct-chat-timestamp pull-right">${time}</span>
+                    </div>
+                    <img class="direct-chat-img" src="/dist/img/${profile}">
+                    <div class="direct-chat-text">
+                      ${msg}
+                    </div>
+                  </div>`
+      $('.direct-chat-messages').append(html)
+      $('.direct-chat-messages').scrollTop($('.direct-chat-messages')[0].scrollHeight + 20)
+    }
+
+    socket.on('c_send_roomInfo', (rooms, myRoom) => {
+      $('#chat_header').empty()
+      $.each(rooms, (idx, item) => {
+        let html = `<span data-toggle="tooltip" title="" class="badge bg-${item === myRoom ? 'red' : 'yellow'}">${item}</span>`
+        $('#chat_header').append(html)
+        if (item != myRoom) {
+          $('#chat_header>span:last').on('click', () => {
+            if(confirm(`${item}방으로 변경하시겠습니까?`)){
+              $('.direct-chat-messages').empty()
+              socket.emit('s_send_roomChg',item)
+            }
+          })
+        }
+      })
+    })
+  </script>
+</body>
+
+</html>

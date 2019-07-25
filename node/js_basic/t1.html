@@ -1,0 +1,34 @@
+<html>
+    <head>
+        <script type="text/javascript" src=" http://code.jquery.com/jquery-latest.min.js"></script>
+        <script type="text/javascript">
+            $('ul > li').on('click',function(){
+                alert('dd')
+            })
+        </script>
+        <style type="text/css">
+            #navigation li {
+                list-style:none;
+                float:left;
+                padding:5px;
+            }
+            #navigation {
+                cursor:pointer;
+            }
+            #navigation .selected {
+                background-color:red;
+                color:white;
+            }
+        </style>
+    </head>
+    <body>
+        <ul id="navigation">
+            <li>HTML</li>
+            <li>CSS</li>
+            <li>javascript</li>
+            <li class="selected">jQuery</li>
+            <li>PHP</li>
+            <li>mysql</li>
+        </ul>
+    </body>
+</html>
